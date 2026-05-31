@@ -13,7 +13,7 @@ import Admin from './views/Admin';
 
 function App() {
   const { 
-    currentUser, login, logout, registerUser, notifications, markNotificationsAsRead, donations, events 
+    currentUser, login, logout, registerUser, notifications, markNotificationsAsRead, donations, events, updateUserProfile
   } = useCharity();
 
   const [currentRoute, setCurrentRoute] = useState(() => {
@@ -35,6 +35,23 @@ function App() {
 
   // Dashboard Modal State for standard Users
   const [showUserDashboard, setShowUserDashboard] = useState(false);
+
+  // Profile edit states
+  const [profileName, setProfileName] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profilePassword, setProfilePassword] = useState('');
+  const [profileAvatar, setProfileAvatar] = useState('');
+  const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
+
+  useEffect(() => {
+    if (currentUser) {
+      setProfileName(currentUser.name || '');
+      setProfilePhone(currentUser.phone || '');
+      setProfilePassword(currentUser.password || '');
+      setProfileAvatar(currentUser.avatar || '');
+      setProfileSuccessMsg('');
+    }
+  }, [currentUser, showUserDashboard]);
 
   // Sync hash with currentRoute for standard single-page bookmarkable compatibility
   useEffect(() => {
@@ -118,9 +135,13 @@ function App() {
           {/* Dashboard Header */}
           <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-slate-50">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                <UserIcon className="w-6 h-6" />
-              </div>
+              {currentUser.avatar ? (
+                <img src={currentUser.avatar} alt={currentUser.name} className="w-12 h-12 rounded-2xl object-cover shadow-lg border border-rose-250 shrink-0" />
+              ) : (
+                <div className="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
+                  <UserIcon className="w-6 h-6" />
+                </div>
+              )}
               <div>
                 <h3 className="text-lg font-black text-slate-900">Tài Khoản Của Tôi</h3>
                 <p className="text-xs text-slate-500 font-bold">{currentUser.name} — {currentUser.email}</p>
@@ -173,6 +194,20 @@ function App() {
             >
               <Calendar className="w-4 h-4" />
               Sự Kiện Đã Đăng Ký ({userEventsRegistered.length})
+            </button>
+            <button
+              onClick={() => {
+                setActiveDashboardTab('profile');
+                setProfileSuccessMsg('');
+              }}
+              className={`flex-grow py-4 text-center font-extrabold text-xs tracking-wider uppercase border-b-2 transition-all flex items-center justify-center gap-2 ${
+                activeDashboardTab === 'profile'
+                  ? 'border-rose-650 text-rose-650 bg-rose-50/20'
+                  : 'border-transparent text-gray-500 hover:text-slate-800'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              Tài Khoản
             </button>
           </div>
 
@@ -332,23 +367,143 @@ function App() {
                               </span>
                             </div>
 
-                            {/* Guaranteed participation */}
-                            <div className="flex flex-col items-end border-l border-gray-150 pl-3">
-                              <span className="text-[10px] text-gray-400 font-black uppercase text-right">Tham gia thực tế</span>
-                              <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold ${
-                                vol?.guaranteedParticipation
-                                  ? 'bg-cyan-50 text-cyan-700 border border-cyan-100'
-                                  : 'bg-slate-50 text-slate-655 border border-slate-100'
-                              }`}>
-                                {vol?.guaranteedParticipation ? 'Đã tham gia' : 'Vắng mặt / Chưa xác thực'}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 )}
+              </div>
+
+            )}
+
+            {activeDashboardTab === 'profile' && (
+              <div className="space-y-6 max-w-xl mx-auto bg-white p-6 rounded-2xl border border-gray-150 shadow-2xs">
+                <h4 className="text-sm font-black text-slate-900 border-b border-gray-100 pb-2">Thay Đổi Thông Tin Cá Nhân</h4>
+                
+                {profileSuccessMsg && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-700 text-xs font-bold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{profileSuccessMsg}</span>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {/* Select Avatar */}
+                  <div className="space-y-2">
+                    <span className="block text-[11px] font-black uppercase text-slate-500">Ảnh đại diện</span>
+                    <div className="flex items-center gap-4">
+                      {profileAvatar ? (
+                        <img src={profileAvatar} alt="Profile Avatar" className="w-16 h-16 rounded-2xl object-cover border-2 border-rose-500 shadow-md shrink-0" />
+                      ) : (
+                        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center text-gray-400 border border-gray-200 shrink-0">
+                          <UserIcon className="w-8 h-8" />
+                        </div>
+                      )}
+                      
+                      <div className="space-y-1">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">Chọn từ kho mẫu:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { name: 'Nam 1', url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200' },
+                            { name: 'Nữ 1', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200' },
+                            { name: 'Nam 2', url: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=200' },
+                            { name: 'Nữ 2', url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200' },
+                            { name: 'Nam 3', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' },
+                            { name: 'Nữ 3', url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200' },
+                          ].map((av) => (
+                            <button
+                              key={av.url}
+                              type="button"
+                              onClick={() => setProfileAvatar(av.url)}
+                              className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition-all hover:scale-105 active:scale-95 ${
+                                profileAvatar === av.url ? 'border-rose-600 scale-102 shadow-sm' : 'border-gray-200'
+                              }`}
+                              title={av.name}
+                            >
+                              <img src={av.url} alt="" className="w-full h-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] text-gray-400 font-bold mt-1 uppercase">Hoặc dán URL ảnh con cưng của bạn:</span>
+                      <input
+                        type="text"
+                        placeholder="https://..."
+                        value={profileAvatar}
+                        onChange={(e) => setProfileAvatar(e.target.value)}
+                        className="w-full text-xs px-3 py-2 mt-1 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-rose-500 font-medium text-slate-700"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <span className="block text-[11px] font-black uppercase text-slate-500">Họ và tên</span>
+                      <input
+                        type="text"
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        className="w-full text-xs px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-rose-500 font-bold text-slate-800"
+                        placeholder="Họ Tên Của Bạn"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="block text-[11px] font-black uppercase text-slate-500">Số điện thoại</span>
+                      <input
+                        type="text"
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        className="w-full text-xs px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-rose-500 font-bold text-slate-800"
+                        placeholder="e.g. 0912345678"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="block text-[11px] font-black uppercase text-slate-500">Email (Không đổi)</span>
+                      <input
+                        type="email"
+                        disabled
+                        value={currentUser.email}
+                        className="w-full text-xs px-4 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 font-bold"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="block text-[11px] font-black uppercase text-slate-500">Mật khẩu mới</span>
+                      <input
+                        type="password"
+                        value={profilePassword}
+                        onChange={(e) => setProfilePassword(e.target.value)}
+                        className="w-full text-xs px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-1 focus:ring-rose-500 font-bold text-slate-800"
+                        placeholder="Mật khẩu bảo mật"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (!profileName.trim()) {
+                        alert('Họ và tên không được để trống!');
+                        return;
+                      }
+                      updateUserProfile({
+                        name: profileName.trim(),
+                        phone: profilePhone.trim(),
+                        password: profilePassword,
+                        avatar: profileAvatar.trim()
+                      });
+                      setProfileSuccessMsg('Cập nhật thông tin thành công!');
+                      setTimeout(() => setProfileSuccessMsg(''), 3000);
+                    }}
+                    className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs uppercase rounded-xl transition-all shadow-md active:scale-98"
+                  >
+                    Lưu Thay Đổi Thật Sự
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -367,7 +522,7 @@ function App() {
     );
   };
 
-  {/* RENDER AUTHENTICATION REGISTER/LOGIN MODEL */}
+  // Render authentication register/login modal
   const renderAuthModal = () => {
     if (!showAuthModal) return null;
     return (
@@ -480,10 +635,10 @@ function App() {
             
             <div className="bg-amber-50 border border-amber-100 p-3 rounded-xl text-amber-800 text-[10px] font-semibold leading-relaxed">
               💡 <strong>Tài khoản mẫu:</strong><br />
-              • Admin chính: <code>superadmin@traitimvang.vn</code> (Mật khẩu: <code>123456</code>)<br />
-              • Kế toán tài chính: <code>finance@traitimvang.vn</code> (Mật khẩu: <code>123456</code>)<br />
-              • Điều phối viên: <code>coordinator@traitimvang.vn</code> (Mật khẩu: <code>123456</code>)<br />
-              • Tình nguyện viên mẫu: <code>volunteer@gmail.com</code> (Mật khẩu: <code>123456</code>)
+              • Admin chính: <code>admin@traitimvang.vn</code> (Mật khẩu: <code>admin</code>)<br />
+              • Kế toán tài chính: <code>ketoan@traitimvang.vn</code> (Mật khẩu: <code>ketoan</code>)<br />
+              • Điều phối viên: <code>dieupat@traitimvang.vn</code> (Mật khẩu: <code>dieupat</code>)<br />
+              • Tình nguyện viên mẫu: <code>hoangnam@gmail.com</code> (Mật khẩu: <code>123</code>)
             </div>
           </form>
 
@@ -577,9 +732,13 @@ function App() {
                         setShowUserDashboard(true);
                       }
                     }}
-                    className="flex items-center gap-2 p-2.5 rounded-xl border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs transition-all max-w-[180px]"
+                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-xl border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs transition-all max-w-[200px]"
                   >
-                    <UserIcon className="w-4 h-4" />
+                    {currentUser.avatar ? (
+                      <img src={currentUser.avatar} alt="" className="w-6 h-6 rounded-lg object-cover border border-rose-250 shrink-0" />
+                    ) : (
+                      <UserIcon className="w-4 h-4 shrink-0" />
+                    )}
                     <span className="truncate">{currentUser.name} ({currentUser.role || 'Member'})</span>
                   </button>
 

@@ -213,15 +213,30 @@ const initialDonations = [
 // Initial default user roles and generic credentials
 const initialUsers = [
   // Admins with specific roles
-  { id: 'usr-1', name: 'Nguyễn Lâm Sơn (Chủ Tịch)', email: 'admin@traitimvang.vn', phone: '0912345678', password: 'admin', role: 'Super Admin' },
-  { id: 'usr-2', name: 'Vũ Thị Thanh Hà (Kế Toán)', email: 'ketoan@traitimvang.vn', phone: '0988765432', password: 'ketoan', role: 'Finance Manager' },
-  { id: 'usr-3', name: 'Trần Minh Đức (Điều Phối)', email: 'dieupat@traitimvang.vn', phone: '0911223344', password: 'dieupat', role: 'Event Coordinator' },
+  { id: 'usr-1', name: 'Nguyễn Lâm Sơn (Chủ Tịch)', email: 'admin@traitimvang.vn', phone: '0912345678', password: 'admin', role: 'Super Admin', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200' },
+  { id: 'usr-2', name: 'Vũ Thị Thanh Hà (Kế Toán)', email: 'ketoan@traitimvang.vn', phone: '0988765432', password: 'ketoan', role: 'Finance Manager', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200' },
+  { id: 'usr-3', name: 'Trần Minh Đức (Điều Phối)', email: 'dieupat@traitimvang.vn', phone: '0911223344', password: 'dieupat', role: 'Event Coordinator', avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=200' },
   
   // Standard members / volunteers / donors
-  { id: 'usr-4', name: 'Hoàng Văn Nam', email: 'hoangnam@gmail.com', phone: '0912123456', password: '123', role: 'User' },
-  { id: 'usr-5', name: 'Đặng Thùy Dương', email: 'thuyduong.neu@gmail.com', phone: '0987654321', password: '123', role: 'User' },
-  { id: 'usr-6', name: 'Lê Minh Trung', email: 'minhtrung@gmail.com', phone: '0901234567', password: '123', role: 'User' }
+  { id: 'usr-4', name: 'Hoàng Văn Nam', email: 'hoangnam@gmail.com', phone: '0912123456', password: '123', role: 'User', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' },
+  { id: 'usr-5', name: 'Đặng Thùy Dương', email: 'thuyduong.neu@gmail.com', phone: '0987654321', password: '123', role: 'User', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200' },
+  { id: 'usr-6', name: 'Lê Minh Trung', email: 'minhtrung@gmail.com', phone: '0901234567', password: '123', role: 'User', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200' }
 ];
+
+const mergeUsersWithDefaults = (storedUsers = []) => {
+  const byEmail = new Map();
+
+  initialUsers.forEach((user) => {
+    byEmail.set(user.email.toLowerCase(), user);
+  });
+
+  storedUsers.forEach((user) => {
+    if (!user?.email) return;
+    byEmail.set(user.email.toLowerCase(), user);
+  });
+
+  return Array.from(byEmail.values());
+};
 
 // Notifications dataset structure
 const initialNotifications = [
@@ -253,7 +268,14 @@ export const CharityProvider = ({ children }) => {
 
   const [users, setUsers] = useState(() => {
     const local = localStorage.getItem('charity_users');
-    return local ? JSON.parse(local) : initialUsers;
+    if (!local) return initialUsers;
+
+    try {
+      const parsed = JSON.parse(local);
+      return Array.isArray(parsed) ? mergeUsersWithDefaults(parsed) : initialUsers;
+    } catch {
+      return initialUsers;
+    }
   });
 
   const [notifications, setNotifications] = useState(() => {
@@ -501,7 +523,11 @@ export const CharityProvider = ({ children }) => {
 
   // User auth and notifications actions
   const login = (email, password) => {
-    const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+    const found = users.find(
+      u => u.email.toLowerCase() === normalizedEmail && u.password === normalizedPassword
+    );
     if (found) {
       setCurrentUser(found);
       return { success: true, user: found };
@@ -514,16 +540,18 @@ export const CharityProvider = ({ children }) => {
   };
 
   const registerUser = (name, email, password, phone) => {
-    const isExist = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password.trim();
+    const isExist = users.some(u => u.email.toLowerCase() === normalizedEmail);
     if (isExist) {
       return { success: false, message: 'Email này đã được sử dụng!' };
     }
     const newUser = {
       id: `usr-${Date.now()}`,
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: normalizedEmail,
       phone,
-      password,
+      password: normalizedPassword,
       role: 'User' // Default standard role
     };
     setUsers(prev => [...prev, newUser]);
@@ -550,6 +578,36 @@ export const CharityProvider = ({ children }) => {
       isRead: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+  };
+
+  const updateUserProfile = (updatedFields) => {
+    if (!currentUser) return;
+    setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, ...updatedFields } : u));
+    setCurrentUser(prev => prev ? { ...prev, ...updatedFields } : null);
+  };
+
+  const adminAddUser = (user) => {
+    const newUser = {
+      ...user,
+      id: `usr-${Date.now()}`,
+      avatar: user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200',
+      role: user.role || 'User'
+    };
+    setUsers(prev => [...prev, newUser]);
+  };
+
+  const adminUpdateUser = (id, updatedFields) => {
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updatedFields } : u));
+    if (currentUser && currentUser.id === id) {
+      setCurrentUser(prev => prev ? { ...prev, ...updatedFields } : null);
+    }
+  };
+
+  const adminDeleteUser = (id) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+    if (currentUser && currentUser.id === id) {
+      setCurrentUser(null);
+    }
   };
 
   const markNotificationsAsRead = (email) => {
@@ -582,7 +640,11 @@ export const CharityProvider = ({ children }) => {
       logout,
       registerUser,
       addNotification,
-      markNotificationsAsRead
+      markNotificationsAsRead,
+      updateUserProfile,
+      adminAddUser,
+      adminUpdateUser,
+      adminDeleteUser
     }}>
       {children}
     </CharityContext.Provider>

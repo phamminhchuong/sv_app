@@ -83,3 +83,32 @@ Máy chủ cục bộ thường mặc định khởi chạy tại địa chỉ: 
   - `Articles.jsx`: Blog chia sẻ cẩm nang thiện nguyện.
   - `AboutUs.jsx`: Giới thiệu tinh thần sáng lập và biểu đồ tròn tài chính.
   - `Admin.jsx`: Bảng điều khiển quản lý toàn bộ CRUD và lịch sử phê duyệt.
+
+---
+
+## Deploy Lên GitHub Pages (Live cho mọi người truy cập)
+
+Dự án đã được cấu hình sẵn workflow tự động deploy tại file `.github/workflows/deploy-pages.yml`.
+
+### 1. Đẩy code lên GitHub
+```bash
+git add .
+git commit -m "setup github pages deploy"
+git push origin main
+```
+
+### 2. Bật GitHub Pages bằng GitHub Actions
+1. Vào repository trên GitHub.
+2. Chọn `Settings` -> `Pages`.
+3. Ở mục `Source`, chọn `GitHub Actions`.
+
+### 3. Chờ workflow chạy
+1. Vào tab `Actions`.
+2. Mở workflow `Deploy to GitHub Pages`.
+3. Sau khi chạy xong, link live sẽ xuất hiện trong phần deploy log.
+
+### 4. Link truy cập
+- Repo thường: `https://<username>.github.io/<repo-name>/`
+- User site (repo tên `<username>.github.io`): `https://<username>.github.io/`
+
+Lưu ý: Nếu dùng branch khác `main`, hãy sửa lại nhánh trong `.github/workflows/deploy-pages.yml`.

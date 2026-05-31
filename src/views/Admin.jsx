@@ -117,7 +117,8 @@ const Admin = () => {
     addCampaign, updateCampaign, deleteCampaign,
     addEvent, updateEvent, deleteEvent,
     addArticle, updateArticle, deleteArticle,
-    updateDonationStatus, updateVolunteer
+    updateDonationStatus, updateVolunteer,
+    users, adminAddUser, adminUpdateUser, adminDeleteUser
   } = useCharity();
 
   const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, campaigns, events, articles, donations
@@ -151,6 +152,16 @@ const Admin = () => {
 
   // View registered volunteers list modal
   const [selectedEvtVolunteers, setSelectedEvtVolunteers] = useState(null);
+
+  // User Management State Variables
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPhone, setUserPhone] = useState('');
+  const [userRole, setUserRole] = useState('User');
+  const [userPassword, setUserPassword] = useState('');
+  const [userAvatar, setUserAvatar] = useState('');
 
   const formatVND = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -252,6 +263,48 @@ const Admin = () => {
     setArtImage('');
   };
 
+  const handleUserSubmit = (e) => {
+    e.preventDefault();
+    if (!userName.trim() || !userEmail.trim()) {
+      alert('Vui lòng điền họ tên và email!');
+      return;
+    }
+    const payload = {
+      name: userName.trim(),
+      email: userEmail.trim().toLowerCase(),
+      phone: userPhone.trim(),
+      role: userRole,
+      password: userPassword || '123',
+      avatar: userAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'
+    };
+
+    if (editingUserId) {
+      adminUpdateUser(editingUserId, payload);
+    } else {
+      adminAddUser(payload);
+    }
+
+    setShowUserForm(false);
+    setEditingUserId(null);
+    setUserName('');
+    setUserEmail('');
+    setUserPhone('');
+    setUserRole('User');
+    setUserPassword('');
+    setUserAvatar('');
+  };
+
+  const startEditUser = (usr) => {
+    setEditingUserId(usr.id);
+    setUserName(usr.name || '');
+    setUserEmail(usr.email || '');
+    setUserPhone(usr.phone || '');
+    setUserRole(usr.role || 'User');
+    setUserPassword(usr.password || '');
+    setUserAvatar(usr.avatar || '');
+    setShowUserForm(true);
+  };
+
   // Check user roles and permissions
   const isSuperAdmin = currentUser?.role === 'Super Admin';
   const isFinanceManager = currentUser?.role === 'Finance Manager';
@@ -319,6 +372,7 @@ const Admin = () => {
           { id: 'events', label: 'Quản Lý Sự Kiện', icon: Calendar },
           { id: 'articles', label: 'Quản Lý Bài Post', icon: FileText },
           { id: 'donations', label: 'Sao Kê & Giao Dịch', icon: CheckCircle },
+          { id: 'users', label: 'Quản Lý Thành Viên', icon: Users },
         ].map((tab) => {
           const IconComp = tab.icon;
           return (
@@ -1042,6 +1096,256 @@ const Admin = () => {
           </div>
         );
       })()}
+        </div>
+      )}
+
+      {/* TAB 6: USER MANAGEMENT WORKFLOWS */}
+      {activeTab === 'users' && (
+        <div className="space-y-6 animate-fadeIn">
+          {!isSuperAdmin ? (
+            renderNoPermission(['Super Admin'])
+          ) : (
+            <>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                    <Users className="w-5 h-5 text-rose-500" /> Bảng Quản Lý Nhân Sự & Thành Viên ({users.length} tài khoản)
+                  </h3>
+                  <p className="text-gray-400 text-[11px] mt-0.5">Thêm, sửa đổi phân quyền hoặc tạm khóa tài khoản người dùng của hệ thống.</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingUserId(null);
+                    setUserName('');
+                    setUserEmail('');
+                    setUserPhone('');
+                    setUserRole('User');
+                    setUserPassword('');
+                    setUserAvatar('');
+                    setShowUserForm(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs uppercase rounded-xl shadow-md transition-all shadow-rose-600/10"
+                >
+                  <PlusCircle className="w-4 h-4" /> Thêm Thành Viên Mới
+                </button>
+              </div>
+
+              <div className="bg-white rounded-3xl border border-gray-150 overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead className="bg-gray-50 text-[10px] text-gray-400 uppercase tracking-widest font-black border-b border-gray-100">
+                      <tr>
+                        <th className="py-4 px-6 text-center w-16">Avatar</th>
+                        <th className="py-4 px-6">Họ và Tên</th>
+                        <th className="py-4 px-6">Email / Đăng nhập</th>
+                        <th className="py-4 px-6">Số điện thoại</th>
+                        <th className="py-4 px-6">Mật khẩu</th>
+                        <th className="py-4 px-6">Quyền hạn</th>
+                        <th className="py-4 px-6 text-right w-32">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 text-slate-700">
+                      {users.map((usr) => (
+                        <tr key={usr.id} className="hover:bg-gray-50/50">
+                          <td className="py-4 px-6 text-center">
+                            <img 
+                              src={usr.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'} 
+                              alt={usr.name}
+                              className="w-10 h-10 rounded-full object-cover border-2 border-rose-50 mx-auto"
+                            />
+                          </td>
+                          <td className="py-4 px-6 font-bold text-slate-900">{usr.name}</td>
+                          <td className="py-4 px-6 font-medium text-slate-600">{usr.email}</td>
+                          <td className="py-4 px-6 font-mono text-gray-500">{usr.phone || 'Chưa cập nhật'}</td>
+                          <td className="py-4 px-6 font-mono font-bold text-gray-400">{usr.password}</td>
+                          <td className="py-4 px-6">
+                            <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider inline-block ${
+                              usr.role === 'Super Admin' 
+                                ? 'bg-rose-100 text-rose-600 border border-rose-200' 
+                                : usr.role === 'Finance Manager'
+                                ? 'bg-amber-100 text-amber-600 border border-amber-200'
+                                : usr.role === 'Event Coordinator'
+                                ? 'bg-sky-100 text-sky-600 border border-sky-200'
+                                : 'bg-gray-100 text-gray-600 border border-gray-200'
+                            }`}>
+                              {usr.role || 'User'}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-right space-x-1.5 shrink-0">
+                            <button
+                              onClick={() => startEditUser(usr)}
+                              className="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
+                              title="Sửa thành viên"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (usr.email === currentUser.email) {
+                                  alert('Không thể tự xóa chính tài khoản đang đăng nhập hiện tại!');
+                                  return;
+                                }
+                                if (window.confirm(`Bạn có chắc muốn xóa thành viên "${usr.name}"?`)) {
+                                  adminDeleteUser(usr.id);
+                                }
+                              }}
+                              className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                              title="Xóa thành viên"
+                            >
+                              <Trash className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* USER CREATE & EDIT DIALOG MODAL */}
+      {showUserForm && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-3xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-150 transform animate-scaleUp">
+            <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+              <div>
+                <p className="text-[10px] font-bold uppercase text-rose-500 tracking-wider">Trình biên tập thành viên</p>
+                <h4 className="font-extrabold text-base">{editingUserId ? 'Cập Nhật Tài Khoản' : 'Thêm Tài Khoản Mới'}</h4>
+              </div>
+              <button 
+                onClick={() => setShowUserForm(false)} 
+                className="p-1 px-2.5 rounded-xl hover:bg-white/10 font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUserSubmit} className="p-6 space-y-4 text-xs font-semibold text-slate-700">
+              <div className="space-y-1">
+                <label className="text-gray-450 block">Họ và tên thành viên <span className="text-rose-500">*</span></label>
+                <input 
+                  type="text"
+                  required
+                  placeholder="Ví dụ: Nguyễn Văn A..."
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-250 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl outline-hidden font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-gray-450 block">Email đăng nhập <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="email"
+                    required
+                    placeholder="name@gmail.com"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    disabled={!!editingUserId}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-250 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl outline-hidden font-medium disabled:opacity-60"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-450 block">Mật khẩu đăng nhập <span className="text-rose-500">*</span></label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="Mật khẩu bảo mật"
+                    value={userPassword}
+                    onChange={(e) => setUserPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-250 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl outline-hidden font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-gray-450 block">Số điện thoại liên hệ</label>
+                  <input 
+                    type="tel"
+                    placeholder="Ví dụ: 0987654321"
+                    value={userPhone}
+                    onChange={(e) => setUserPhone(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-250 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl outline-hidden font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-gray-450 block">Phân quyền vai trò <span className="text-rose-500">*</span></label>
+                  <select
+                    value={userRole}
+                    onChange={(e) => setUserRole(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-250 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl outline-hidden"
+                  >
+                    <option value="User">User (Thành viên quyên góp)</option>
+                    <option value="Super Admin">Super Admin (Tổng quản trị viên)</option>
+                    <option value="Finance Manager font-semibold">Finance Manager (Thủ quỹ tài chính)</option>
+                    <option value="Event Coordinator font-semibold">Event Coordinator (Hợp tác sự kiện)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-gray-450 block">Ảnh đại diện (Avatar url)</label>
+                <div className="flex gap-3">
+                  <input 
+                    type="url"
+                    placeholder="https://images.unsplash.com/..."
+                    value={userAvatar}
+                    onChange={(e) => setUserAvatar(e.target.value)}
+                    className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-250 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl outline-hidden font-mono text-[10px]"
+                  />
+                  <img 
+                    src={userAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200'} 
+                    alt="Preview"
+                    className="w-10 h-10 rounded-full object-cover border border-gray-250 bg-slate-100"
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 font-medium">Bấm chọn một ảnh mẫu bên dưới để đổi nhanh:</p>
+                <div className="flex gap-2 p-1 bg-gray-50 rounded-xl border border-gray-150 overflow-x-auto scrollbar-none">
+                  {[
+                    { name: 'Boy 1', url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150' },
+                    { name: 'Girl 1', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150' },
+                    { name: 'Boy 2', url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=150' },
+                    { name: 'Girl 2', url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150' },
+                    { name: 'Boy 3', url: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&q=80&w=150' },
+                    { name: 'Girl 3', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150' },
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setUserAvatar(preset.url)}
+                      className={`flex-shrink-0 w-8 h-8 rounded-full overflow-hidden border-2 ${
+                        userAvatar === preset.url ? 'border-rose-500 ring-2 ring-rose-200' : 'border-transparent'
+                      }`}
+                      title={preset.name}
+                    >
+                      <img src={preset.url} alt={preset.name} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowUserForm(false)}
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-slate-800 font-extrabold uppercase rounded-xl"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold uppercase rounded-xl shadow-md transition-all shadow-rose-600/10"
+                >
+                  {editingUserId ? 'Lưu cập nhật' : 'Thêm mới'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

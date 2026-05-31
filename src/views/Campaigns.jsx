@@ -3,7 +3,7 @@ import { useCharity } from '../context/CharityContext';
 import { Heart, Plus, Users, Award, Shield, Check, QrCode } from 'lucide-react';
 
 const Campaigns = ({ initialSelectedCampaignId }) => {
-  const { campaigns, donations, addDonation } = useCharity();
+  const { campaigns, donations, addDonation, currentUser } = useCharity();
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   
@@ -50,8 +50,8 @@ const Campaigns = ({ initialSelectedCampaignId }) => {
     setDonationStep(1);
     setDonateAmount(200000);
     setDonateCustomAmount('');
-    setDonorName('');
-    setDonorEmail('');
+    setDonorName(currentUser ? currentUser.name : '');
+    setDonorEmail(currentUser ? currentUser.email : '');
     setDonorMessage('');
     setHideName(false);
     setPaymentMethod('chuyển khoản');
@@ -87,6 +87,7 @@ const Campaigns = ({ initialSelectedCampaignId }) => {
       campaignId: selectedCampaign.id,
       campaignTitle: selectedCampaign.title,
       donorName: finalName,
+      donorEmail: donorEmail.trim().toLowerCase(),
       amount: finalAmount,
       message: donorMessage.trim() || 'Ủng hộ chiến dịch ý nghĩa này.',
       paymentMethod: paymentMethod,
