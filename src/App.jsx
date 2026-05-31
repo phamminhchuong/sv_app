@@ -687,12 +687,12 @@ function App() {
             </div>
 
             {/* DESKTOP NAV LINKS */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-0.5 lg:gap-1">
               {navLinks.map((link) => (
                 <button
                   key={link.path}
                   onClick={() => navigateTo(link.path)}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all ${
+                  className={`px-2 py-2 lg:px-4 lg:py-2.5 rounded-xl text-xs lg:text-sm font-bold tracking-wide transition-all shrink-0 ${
                     currentRoute === link.path
                       ? 'bg-rose-50 text-rose-650'
                       : 'text-gray-650 hover:bg-gray-100 hover:text-slate-900'
@@ -704,16 +704,16 @@ function App() {
             </nav>
 
             {/* ACTION DIRECT BUTTONS */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
               {/* Notifications and Profile triggers */}
               {currentUser ? (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 lg:gap-2">
                   <button
                     onClick={() => {
                       setShowUserDashboard(true);
                       markNotificationsAsRead(currentUser.email);
                     }}
-                    className="p-2.5 rounded-xl border border-gray-150 text-slate-700 bg-white hover:bg-gray-50 relative flex items-center justify-center transition-all"
+                    className="p-2 lg:p-2.5 rounded-xl border border-gray-150 text-slate-700 bg-white hover:bg-gray-50 relative flex items-center justify-center transition-all shrink-0"
                     title="Thông báo & Quản lý của tôi"
                   >
                     <Bell className="w-4 h-4" />
@@ -732,19 +732,22 @@ function App() {
                         setShowUserDashboard(true);
                       }
                     }}
-                    className="flex items-center gap-2 p-1.5 px-2.5 rounded-xl border border-rose-100 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs transition-all max-w-[200px]"
+                    className="flex items-center gap-1.5 lg:gap-2 p-1.5 lg:p-2 rounded-xl border border-rose-150 bg-rose-50 hover:bg-rose-100 text-rose-700 font-extrabold text-xs transition-all max-w-[45px] lg:max-w-[180px] xl:max-w-[220px]"
+                    title={`${currentUser.name} (${currentUser.role || 'Member'})`}
                   >
                     {currentUser.avatar ? (
                       <img src={currentUser.avatar} alt="" className="w-6 h-6 rounded-lg object-cover border border-rose-250 shrink-0" />
                     ) : (
                       <UserIcon className="w-4 h-4 shrink-0" />
                     )}
-                    <span className="truncate">{currentUser.name} ({currentUser.role || 'Member'})</span>
+                    <span className="hidden lg:inline truncate text-[11px] lg:text-xs">
+                      {currentUser.name} <span className="opacity-75 text-[10px] hidden xl:inline">({currentUser.role || 'Member'})</span>
+                    </span>
                   </button>
 
                   <button
                     onClick={() => logout()}
-                    className="p-2.5 rounded-xl border border-gray-150 text-rose-600 bg-white hover:bg-rose-50 flex items-center justify-center transition-all"
+                    className="p-2 lg:p-2.5 rounded-xl border border-gray-150 text-rose-600 bg-white hover:bg-rose-50 flex items-center justify-center transition-all shrink-0"
                     title="Đăng xuất khỏi hệ thống"
                   >
                     <LogOut className="w-4 h-4" />
@@ -757,9 +760,9 @@ function App() {
                     setAuthError('');
                     setShowCampAuthModal(true);
                   }}
-                  className="flex items-center gap-1.5 p-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-slate-750 font-bold text-xs shadow-2xs transition-all"
+                  className="flex items-center gap-1.5 p-2 lg:p-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-slate-750 font-bold text-xs shadow-2xs transition-all shrink-0"
                 >
-                  <UserIcon className="w-4 h-4 text-rose-500" /> Đăng nhập / Đăng ký
+                  <UserIcon className="w-4 h-4 text-rose-500" /> <span className="hidden lg:inline">Đăng nhập / Đăng ký</span>
                 </button>
               )}
 
@@ -767,22 +770,22 @@ function App() {
               {currentUser && currentUser.role && currentUser.role !== 'User' && (
                 <button
                   onClick={() => navigateTo('/admin')}
-                  className={`p-2.5 rounded-xl border transition-all flex items-center gap-1.5 text-xs font-bold ${
+                  className={`p-2 lg:p-2.5 rounded-xl border transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 ${
                     currentRoute === '/admin'
                       ? 'bg-slate-900 border-slate-900 text-white shadow-md'
-                      : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                      : 'bg-white border-gray-205 text-gray-650 hover:bg-gray-50'
                   }`}
-                  title="Tru cập trang Quản lý Admin"
+                  title="Truy cập trang Quản lý Admin"
                 >
-                  <Settings className="w-4 h-4" /> Bàn điều phối
+                  <Settings className="w-4 h-4" /> <span className="hidden lg:inline">Bàn điều phối</span>
                 </button>
               )}
               
               <button
                 onClick={() => navigateTo('/campaigns')}
-                className="px-5 py-3 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-extrabold text-xs tracking-wider uppercase rounded-xl shadow-md transition-all shadow-rose-500/10"
+                className="px-3 lg:px-4.5 py-2.5 lg:py-3 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-extrabold text-[11px] lg:text-xs tracking-wider uppercase rounded-xl shadow-md transition-all shadow-rose-500/10 shrink-0"
               >
-                Quyên Góp Ngay
+                Quyên Góp
               </button>
             </div>
 
