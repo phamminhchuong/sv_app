@@ -792,20 +792,35 @@ function App() {
             {/* MOBILE MENU TOGGLE BUTTON */}
             <div className="md:hidden flex items-center gap-2">
               {currentUser ? (
-                <button
-                  onClick={() => {
-                    setShowUserDashboard(true);
-                    markNotificationsAsRead(currentUser.email);
-                  }}
-                  className="p-2 rounded-lg border bg-white border-gray-200 text-slate-700 relative"
-                >
-                  <Bell className="w-4 h-4" />
-                  {unreadNotifCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
-                      {unreadNotifCount}
-                    </span>
+                <>
+                  <button
+                    onClick={() => {
+                      setShowUserDashboard(true);
+                      markNotificationsAsRead(currentUser.email);
+                    }}
+                    className="p-2 rounded-lg border bg-white border-gray-200 text-slate-700 relative"
+                  >
+                    <Bell className="w-4 h-4" />
+                    {unreadNotifCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                        {unreadNotifCount}
+                      </span>
+                    )}
+                  </button>
+                  {currentUser.role && currentUser.role !== 'User' && (
+                    <button
+                      onClick={() => navigateTo('/admin')}
+                      className={`p-2 rounded-lg border transition-all ${
+                        currentRoute === '/admin'
+                          ? 'bg-slate-900 border-slate-900 text-white'
+                          : 'bg-white border-gray-200 text-slate-700 hover:bg-gray-50'
+                      }`}
+                      title="Trang quản trị"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
                   )}
-                </button>
+                </>
               ) : (
                 <button
                   onClick={() => {
@@ -845,6 +860,18 @@ function App() {
                 {link.label}
               </button>
             ))}
+            {currentUser && currentUser.role && currentUser.role !== 'User' && (
+              <button
+                onClick={() => { navigateTo('/admin'); setMobileMenuOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-2 ${
+                  currentRoute === '/admin'
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <Settings className="w-4 h-4" /> Bàn Điều Phối (Admin)
+              </button>
+            )}
             <button
               onClick={() => navigateTo('/campaigns')}
               className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase rounded-xl tracking-wider shadow-md text-center block mt-4"
