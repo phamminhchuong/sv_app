@@ -421,9 +421,9 @@ const Admin = () => {
 
           {/* Table of pending transactions */}
           <div className="bg-white rounded-3xl border border-gray-150 overflow-hidden shadow-xs">
-            <div className="p-6 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
+            <div className="p-6 bg-gray-50/50 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <h3 className="font-extrabold text-slate-900 text-sm">Giao Dịch Chờ Đối Khớp Ngân Hàng (Sử dụng cho thử nghiệm duyệt live)</h3>
-              <span className="px-2.5 py-1 bg-amber-100 text-amber-600 rounded text-[10px] font-bold">Mô tả: Nhấn nút duyệt để tự động cộng dòng tiền</span>
+              <span className="shrink-0 px-2.5 py-1 bg-amber-100 text-amber-600 rounded text-[10px] font-bold">Mô tả: Nhấn nút duyệt để tự động cộng dòng tiền</span>
             </div>
 
             <div className="overflow-x-auto">
@@ -486,14 +486,14 @@ const Admin = () => {
             renderNoPermission(['Super Admin', 'Finance Manager'])
           ) : (
             <>
-              <div className="flex justify-between items-center sm:gap-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <h3 className="font-extrabold text-slate-900 text-base">Tất Cả Chiến Dịch Gây Quỹ ({campaigns.length})</h3>
                 <button
                   onClick={() => {
                     setEditingCampId(null);
                     setShowCampForm(true);
                   }}
-                  className="px-4.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-rose-650/15"
+                  className="shrink-0 px-4.5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-rose-650/15"
                 >
                   <Plus className="w-4 h-4" /> Thêm Chiến Dịch Mới
                 </button>
@@ -595,6 +595,7 @@ const Admin = () => {
 
               {/* Table display */}
               <div className="bg-white rounded-3xl border border-gray-150 overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead className="bg-gray-50 text-[10px] text-gray-400 uppercase tracking-widest font-black border-b border-gray-100">
                     <tr>
@@ -632,6 +633,7 @@ const Admin = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
@@ -645,11 +647,11 @@ const Admin = () => {
             renderNoPermission(['Super Admin', 'Event Coordinator'])
           ) : (
             <>
-              <div className="flex justify-between items-center gap-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <h3 className="font-extrabold text-slate-900 text-base">Chiến Dịch Tuyển Tình Nguyện Viên ({events.length})</h3>
                 <button
                   onClick={() => setShowEventForm(true)}
-                  className="px-4.5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-sky-655/15"
+                  className="shrink-0 px-4.5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md shadow-sky-655/15"
                 >
                   <Plus className="w-4 h-4" /> Thêm Sự Kiện Tuyển Quân
                 </button>
@@ -742,6 +744,7 @@ const Admin = () => {
 
               {/* Events table */}
               <div className="bg-white rounded-3xl border border-gray-150 overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead className="bg-gray-50 text-[10px] text-gray-400 uppercase tracking-widest font-black border-b border-gray-100">
                     <tr>
@@ -783,6 +786,7 @@ const Admin = () => {
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
@@ -796,11 +800,11 @@ const Admin = () => {
             renderNoPermission(['Super Admin'])
           ) : (
             <>
-              <div className="flex justify-between items-center gap-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <h3 className="font-extrabold text-slate-900 text-base">Danh Sách Các Bài Viết Đã Đăng ({articles.length})</h3>
                 <button
                   onClick={() => setShowArticleForm(true)}
-                  className="px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md"
+                  className="shrink-0 px-4.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md"
                 >
                   <Plus className="w-4 h-4" /> Viết Bài Đăng Mới
                 </button>
@@ -901,6 +905,7 @@ const Admin = () => {
 
               {/* Articles list UI display */}
               <div className="bg-white rounded-3xl border border-gray-150 overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead className="bg-gray-50 text-[10px] text-gray-400 uppercase tracking-widest font-black border-b border-gray-100">
                     <tr>
@@ -930,6 +935,7 @@ const Admin = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
@@ -943,12 +949,13 @@ const Admin = () => {
             renderNoPermission(['Super Admin', 'Finance Manager'])
           ) : (
             <>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <h3 className="font-extrabold text-slate-900 text-sm">Sổ Cái Quản Lý Sao Kê Quỹ Trái Tim Vàng ({donations.length} Lịch sử giao dịch)</h3>
-                <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded">Đối khớp chuẩn xác 256-bit</span>
+                <span className="shrink-0 text-[10px] font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded">Đối khớp chuẩn xác 256-bit</span>
               </div>
 
               <div className="bg-white rounded-3xl border border-gray-150 overflow-hidden shadow-xs">
+                <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead className="bg-gray-50 text-[10px] text-gray-400 uppercase tracking-widest font-black border-b border-gray-100">
                     <tr>
@@ -985,6 +992,7 @@ const Admin = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </>
           )}
