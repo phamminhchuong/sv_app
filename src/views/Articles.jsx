@@ -24,7 +24,7 @@ const Articles = () => {
       </div>
 
       {/* FILTER BUTTONS */}
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-3">
         {categories.map((cat) => (
           <button
             key={cat}
@@ -32,9 +32,9 @@ const Articles = () => {
               setSelectedCategory(cat);
               setSelectedArticle(null);
             }}
-            className={`px-4.5 py-2.5 rounded-xl text-xs font-bold transition-all border ${
+            className={`px-5 py-3 rounded-2xl text-xs font-bold transition-all border ${
               selectedCategory === cat
-                ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/20'
+                ? 'bg-rose-600 text-white border-rose-600 shadow-lg shadow-rose-600/20 scale-102'
                 : 'bg-white text-gray-500 hover:bg-gray-100 hover:text-rose-600 border-gray-150'
             }`}
           >
